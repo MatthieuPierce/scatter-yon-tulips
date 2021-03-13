@@ -26,12 +26,12 @@ import {
 const padding = 40;
 let margin = {
   top: padding,
-  right: padding,
+  right: padding + 5,
   bottom: padding,
   left: padding + 10
 };
-let width = 800;
-let height = 600;
+let width = 600;
+let height = 450;
 let innerWidth = width - margin.left - margin.right;
 let innerHeight = height - margin.top - margin.bottom;
 
@@ -50,12 +50,14 @@ let chart = select('#chart-container')
   .attr("id", "inner-group")
   ;
 
+// Helper Function: simple clamp (for use in bounding tooltip position )
+let clamp = (min, val, max) => Math.max(min, Math.min(val, max));
 
 let dataset;
 // Datset source
 const dataUrl = 'https://raw.githubusercontent.com/freeCodeCamp/ProjectReferenceData/master/cyclist-data.json';
 
-// fetch dataset & render marks
+// Fetch Dataset & Render Marks
 json(dataUrl).then(data => {
 
   // console dataset to examine
@@ -103,45 +105,114 @@ json(dataUrl).then(data => {
   chart.append("g")
     .attr("id", "x-axis")
     .attr("transform", `translate(0, ${innerHeight})`)
+    .style("color", "var(--primary-color)")
     .call(xAxis)
-    .call(g => selectAll("#x-axis .tick text")
-      .text(t => timeFormat("%Y")(t)));
+    .call(g => g.selectAll("#x-axis .tick text")
+      .text(t => timeFormat("%Y")(t))
+      // .attr("fill", "red")
+      )
+    .call(g => g.select(".domain")
+      .attr("stroke-opacity", 0.5));
 
   // yAxis
   const yAxis = axisLeft(yScale);
   chart.append("g")
     .attr("id", "y-axis")
     .attr("transform", `translate(${0}, ${0})`)
+    .style("color", "var(--primary-color)")
     .call(yAxis)
-    .call(g => selectAll("#y-axis .tick text")
+    .call(g => g.selectAll("#y-axis .tick text")
       .text(t => timeFormat("%M:%S")(t))
       )
-      ;
+    .call(g => g.select(".domain")
+      .attr("stroke-opacity", 0.5));
 
-  // legend
+  // Legend
 
-  // tooltip
+  // Tooltip
   let tooltip = select("#chart-container").append("div")
     .style("opacity", 1)
-    .style("z-index", 20)
-    .style("background", `hsla(220, 40%, 20%, 0.9)`)
+    .style("z-index", 0)
+    .style("background", `hsla(220, 40%, 20%, 0.0)`)
     .style("border-width", "1px")
     .style("border-radius", "2px")
     .style("padding", "0px 5px")
     .style("position", "absolute")
-    .style("font-size", "1.2rem")
+    .style("font-size", "1rem")
     .style("text-align", "center")
     .attr("id", "tooltip")
-    .html(`<p>There sure is plenty of html in here</p>
-      <p>Yes, nobody is likely to be a clever fellow about these Ps</p>`);
+    .html(`<p>There sure is plenty of html in here</p>`);
 
-  // handle mouseOver/focus
+  // Handle mouseOver/focus on marks
   const handleMouseOver = (event, d) => {
+    // Style current mark
+    select(event.currentTarget)
+      .attr("stroke-width", "2px")
+      .attr("opacity", 1)
 
-  }
-  // handle mouseOut/leave
-  const handleMouseOut = (event, d) => {
+    // Change message depending on presence of d.Doping value
+    if (d.Doping) {
+      tooltip
+        .html(`
+          <div>
+            <p>${d.Name}</p>
+            <p>${d.Nationality}</p>
+            <p>${d.Time} in ${timeFormat("%Y")(d.Year)}</p>
+            <p class="doping">${d.Doping}</p>
+          </div>`)
+    } else {
+      tooltip
+        .html(`
+          <div>
+            <p>${d.Name}</p>
+            <p>${d.Nationality}</p>
+            <p>${d.Time} in ${timeFormat("%Y")(d.Year)}</p>
+            <p class="no-doping">Blessedly, no doping allegations yet</p>
+          </div>`)
+    }
+
+    // Position and transition tooltip
+    let tooltipDimensions = document.querySelector("#tooltip")
+      .getBoundingClientRect();
+    let chartDimensions = document.querySelector("#chart")
+      .getBoundingClientRect(); 
     
+    tooltip
+      .attr("data-year", d => d[xValue])
+      .style("top",
+        `${clamp(
+          0,
+          // event.offsetY - tooltipDimensions.height - 8,
+          event.offsetY - tooltipDimensions.height,
+          chartDimensions.height - tooltipDimensions.height
+        )}px`)
+      .style("left",
+        `${clamp(
+          margin.left,
+          event.offsetX,
+          chartDimensions.width - tooltipDimensions.width
+        )}px`)
+      .style("z-index", 20)
+      .transition()
+      .duration(50)
+      .style("opacity", 1)
+
+    
+  }
+  // Handle mouseOut/leave
+  const handleMouseOut = (event, d) => {
+
+    select(event.currentTarget)
+      .attr("opacity", 0.4)
+      .attr("stroke-width", "1px");
+
+    tooltip
+      .attr("data-year", null)
+      .html(null)
+      .style("z-index", -1)
+      .transition()
+      .duration(250)
+      .style("opacity", 0)
   }
 
   
@@ -150,12 +221,20 @@ json(dataUrl).then(data => {
     .data(dataset)
     .enter()
     .append("circle")
+    .attr("class", "dot")
+    .attr("data-xvalue", d => d[xValue])
+    .attr("data-yvalue", d => d[yValue])
     .attr("cx", d => xScale(d[xValue]))
     .attr("cy", d => yScale(d[yValue]))
-    .attr("r", 12)
+    .attr("r", 14)
+    .attr("opacity", 0.4)
     .attr("fill", d => (d[colorValue])
-      ? `hsla(20, 70%, 50%, 0.4)` 
-      : `hsla(150, 70%, 50%, 0.4)`)
+      ? `var(--doping-color)` 
+      : `var(--no-doping-color)`)
+    .attr("stroke", `hsla(0, 0%, 0%, 1)`)
+    .attr("stroke-width", "1px")
+    .attr("stroke-linejoin", "round")
+    .attr("stroke-dasharray", "4 1 3 1 2 1")
     .on("mouseover pointerover focus", handleMouseOver)
     .on("mouseout pounterout pointerleave", handleMouseOut)
 
