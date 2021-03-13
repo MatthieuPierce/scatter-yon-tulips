@@ -3,12 +3,9 @@ import './index.css';
 import { 
   select, 
   scaleTime, 
-  scaleLinear, 
-  scaleSequential, 
   json, 
   min, 
   max,
-  interpolateReds,
   axisBottom,
   axisLeft,
   selectAll,
@@ -17,7 +14,7 @@ import {
 
 // chart objectives
 // race times for the 35 fastest times up Alpe d'Huez 
-// vs.years;
+// over  years;
 // categorical color to distinguish doping allegations: true/false
 // tooltip with details: {Name}: {Nationality} / Year: {Year} Time: {Time} /
 // <br> / {Doping notes} [[optional: URL]]
@@ -133,13 +130,7 @@ json(dataUrl).then(data => {
   let tooltip = select("#chart-container").append("div")
     .style("opacity", 1)
     .style("z-index", 0)
-    .style("background", `hsla(220, 40%, 20%, 0.0)`)
-    .style("border-width", "1px")
-    .style("border-radius", "2px")
-    .style("padding", "0px 5px")
     .style("position", "absolute")
-    .style("font-size", "1rem")
-    .style("text-align", "center")
     .attr("id", "tooltip")
     .html(`<p>There sure is plenty of html in here</p>`);
 
@@ -154,21 +145,19 @@ json(dataUrl).then(data => {
     if (d.Doping) {
       tooltip
         .html(`
-          <div>
-            <p>${d.Name}</p>
             <p>${d.Nationality}</p>
+            <p><strong>${d.Name}</strong></p>
             <p>${d.Time} in ${timeFormat("%Y")(d.Year)}</p>
             <p class="doping">${d.Doping}</p>
-          </div>`)
+          `)
     } else {
       tooltip
         .html(`
-          <div>
-            <p>${d.Name}</p>
             <p>${d.Nationality}</p>
+            <p><strong>${d.Name}</strong></p>
             <p>${d.Time} in ${timeFormat("%Y")(d.Year)}</p>
             <p class="no-doping">Blessedly, no doping allegations yet</p>
-          </div>`)
+          `)
     }
 
     // Position and transition tooltip
@@ -178,7 +167,6 @@ json(dataUrl).then(data => {
       .getBoundingClientRect(); 
     
     tooltip
-      .attr("data-year", d => d[xValue])
       .style("top",
         `${clamp(
           0,
@@ -189,7 +177,7 @@ json(dataUrl).then(data => {
       .style("left",
         `${clamp(
           margin.left,
-          event.offsetX,
+          event.offsetX + 1,
           chartDimensions.width - tooltipDimensions.width
         )}px`)
       .style("z-index", 20)
@@ -208,7 +196,7 @@ json(dataUrl).then(data => {
 
     tooltip
       .attr("data-year", null)
-      .html(null)
+      // .html(null)
       .style("z-index", -1)
       .transition()
       .duration(250)
