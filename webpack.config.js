@@ -1,6 +1,6 @@
 const path = require('path');
 const MiniCssExtractPlugin = require('mini-css-extract-plugin');
-const { CleanWebPackPlugin } = require('clean-webpack-plugin');
+const { CleanWebpackPlugin } = require('clean-webpack-plugin');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
  
 
@@ -18,7 +18,7 @@ module.exports = {
   entry: './src/index.js',
   output: {
     filename: 'bundle.js',
-    path: path.resolve(_dirname, 'dist'),
+    path: path.resolve(__dirname, 'dist'),
     //path for asset resources, e.g. images
     assetModuleFilename: 'images/[hash][ext][query]',
   },
@@ -60,7 +60,7 @@ module.exports = {
     ]
   },
   plugins: [
-    new CleanWebPackPlugin(),
+    new CleanWebpackPlugin(),
     new MiniCssExtractPlugin(),
     new HtmlWebpackPlugin( {
       template: './src/index.html'
