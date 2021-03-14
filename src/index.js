@@ -27,8 +27,8 @@ let margin = {
   bottom: padding,
   left: padding + 10
 };
-let width = 600;
-let height = 450;
+let width = 500;
+let height = 375;
 let innerWidth = width - margin.left - margin.right;
 let innerHeight = height - margin.top - margin.bottom;
 
@@ -63,7 +63,7 @@ json(dataUrl).then(data => {
   // Place: number, Seconds: number, Time: string (converted string of Seconds),
   // URL: string (src for Doping), Year: number
 
-  // parse dataset
+  // Parse dataset
   const dataset = data.map(d => {
     return {
       ...d,
@@ -78,7 +78,7 @@ json(dataUrl).then(data => {
   const yValue = "TimeMins"
   const colorValue = "Doping"
 
-  // calc xMin xMax yMin yMax (or extent)
+  // Calc xMin xMax yMin yMax (or extent)
   const xMin = min(dataset, d => d[xValue]);
   const xMax = max(dataset, d => d[xValue]);
   const yMin = min(dataset, d => d[yValue]);
@@ -108,8 +108,19 @@ json(dataUrl).then(data => {
       .text(t => timeFormat("%Y")(t))
       // .attr("fill", "red")
       )
+    .call(g => g.selectAll("#x-axis .tick line")
+      .attr("stroke-opacity", 0.2)
+      // .attr("stroke-dasharray", "4 1 3 1 2 1")
+      )
     .call(g => g.select(".domain")
-      .attr("stroke-opacity", 0.5));
+      .attr("stroke-opacity", 0.0)
+      .attr("stroke-dasharray", "10 5 5 5"))
+    .append("text")
+      .text("Race Year")
+      .attr("transform", `translate(${innerWidth / 2}, ${33})`)
+      .attr("fill", "var(--primary-color)")
+      .style("font-size", "1.7em")
+      ;
 
   // yAxis
   const yAxis = axisLeft(yScale);
@@ -121,8 +132,27 @@ json(dataUrl).then(data => {
     .call(g => g.selectAll("#y-axis .tick text")
       .text(t => timeFormat("%M:%S")(t))
       )
+    .call(g => g.selectAll("#y-axis .tick line")
+      .attr("stroke-opacity", 0.1)
+      .attr("stroke-dasharray", "10 5 5 5")
+      .attr("x1", 0)
+      .attr("x2", innerWidth)
+      )
     .call(g => g.select(".domain")
-      .attr("stroke-opacity", 0.5));
+      .attr("stroke-opacity", 0.0)
+      .attr("stroke-dasharray", "4 1 3 1 2 1"))
+    .append("text")
+      .text("Alpe d'Huez Race Time")
+      .attr("transform", `translate(${-margin.left + 15}, ${-15})`)
+      .attr("text-anchor", "start")
+      .attr("fill", "var(--primary-color)")
+    // .append("text")
+    //   .text("mm:ss")
+    //   // .attr("transform", `translate(${margin.left - 5}, ${-10})`)
+    //   // .attr("text-anchor", "end")
+    //   .attr("fill", "var(--primary-color)")
+      ;
+
 
   // Legend
 
@@ -141,7 +171,7 @@ json(dataUrl).then(data => {
       .attr("stroke-width", "2px")
       .attr("opacity", 1)
 
-    // Change message depending on presence of d.Doping value
+    // Change tooltip message depending on presence of d.Doping value
     if (d.Doping) {
       tooltip
         .html(`
@@ -170,30 +200,26 @@ json(dataUrl).then(data => {
       .style("top",
         `${clamp(
           0,
-          // event.offsetY - tooltipDimensions.height - 8,
           event.offsetY - tooltipDimensions.height,
-          chartDimensions.height - tooltipDimensions.height
+          chartDimensions.height - tooltipDimensions.height - 2
         )}px`)
       .style("left",
         `${clamp(
           margin.left,
           event.offsetX + 1,
-          chartDimensions.width - tooltipDimensions.width
+          chartDimensions.width - tooltipDimensions.width - 2
         )}px`)
       .style("z-index", 20)
       .transition()
       .duration(50)
       .style("opacity", 1)
-
-    
   }
+
   // Handle mouseOut/leave
   const handleMouseOut = (event, d) => {
-
     select(event.currentTarget)
       .attr("opacity", 0.4)
       .attr("stroke-width", "1px");
-
     tooltip
       .attr("data-year", null)
       // .html(null)
@@ -203,8 +229,7 @@ json(dataUrl).then(data => {
       .style("opacity", 0)
   }
 
-  
-  // marks (circles)
+  // Marks (circles)
   chart.selectAll("circle")
     .data(dataset)
     .enter()
@@ -214,7 +239,7 @@ json(dataUrl).then(data => {
     .attr("data-yvalue", d => d[yValue])
     .attr("cx", d => xScale(d[xValue]))
     .attr("cy", d => yScale(d[yValue]))
-    .attr("r", 14)
+    .attr("r", 10)
     .attr("opacity", 0.4)
     .attr("fill", d => (d[colorValue])
       ? `var(--doping-color)` 
@@ -225,9 +250,12 @@ json(dataUrl).then(data => {
     .attr("stroke-dasharray", "4 1 3 1 2 1")
     .on("mouseover pointerover focus", handleMouseOver)
     .on("mouseout pounterout pointerleave", handleMouseOut)
-
   }
-);
+)
+.catch(err => {
+  alert(err);
+  console.log(err);
+});
 
 
 

@@ -1,7 +1,7 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter&display=swap');
 
 :root {
-  --primary-color: hsl(49, 57%, 5%);
+  --primary-color: hsl(49, 57%, 7%);
   --secondary-color: hsl(49, 57%, 92%);
   --doping-color: hsla(20, 70%, 50%, 1);
   --no-doping-color: hsla(150, 70%, 50%, 1);
@@ -29,14 +29,11 @@ main {
   display: flex;
   flex-direction: column;
   align-items: center;
-  max-width: 960px;
+  max-width: 700px;
 }
 
 #chart-container {
-  /* display: grid; */
-  /* justify-items: center; */
-
-  display: inline-block;
+  /* display: inline-block; */
   position: relative;
   width: 100%;
   padding: 0;
@@ -48,7 +45,7 @@ main {
 }
 
 #chart {
-  display: inline-block;
+  /* display: inline-block; */
   position: absolute;
   top: 0;
   left: 0;
