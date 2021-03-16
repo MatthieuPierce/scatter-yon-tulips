@@ -27,7 +27,7 @@ const padding = 30;
 let margin = {
   top: padding,
   right: padding,
-  bottom: padding + 20,
+  bottom: padding + 25,
   left: padding + 35
 };
 let width = 500;
@@ -175,6 +175,7 @@ console.log(colorKeys);
       .attr("transform", `translate(${-margin.left + padding}, ${0})`)
       .attr("text-anchor", "start")
       .attr("fill", "var(--primary-color)")
+      .style("font-size", "1.7em")
       ;
 
 

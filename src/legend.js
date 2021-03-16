@@ -5,7 +5,7 @@ import { select } from 'd3';
 export const legend = (chart, colorKeys, colorScale, innerWidth, handleMouseOver, handleMouseOut) => {
   
 chart.append("g")
-.attr("transform", `translate(${innerWidth - 170}, ${-10})`)
+.attr("transform", `translate(${innerWidth - 140}, ${-13})`)
 .attr("id", "legend")
 .append("rect")
   .attr("fill", "var(--secondary-color)")
