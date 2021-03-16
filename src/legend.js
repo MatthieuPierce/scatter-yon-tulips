@@ -1,11 +1,16 @@
 import { select } from 'd3';
+import { handleMouseOver, handleMouseOut } from './handleMouse';
+import { chart, innerWidth } from './chartParameters';
 
 // Color legend
 
-export const legend = (chart, colorKeys, colorScale, innerWidth, handleMouseOver, handleMouseOut) => {
+export const legend = ( 
+  colorKeys, 
+  colorScale, 
+  ) => {
   
 chart.append("g")
-.attr("transform", `translate(${innerWidth - 140}, ${-13})`)
+.attr("transform", `translate(${(innerWidth - 140)}, ${-13})`)
 .attr("id", "legend")
 .append("rect")
   .attr("fill", "var(--secondary-color)")
