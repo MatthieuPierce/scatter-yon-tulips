@@ -13,7 +13,7 @@ export const buildYAxis = ( yScale ) => {
       .text(t => timeFormat("%M:%S")(t))
       )
     .call(g => g.selectAll("#y-axis .tick line")
-      .attr("stroke-opacity", 0.1)
+      .attr("stroke-opacity", 0.3)
       .attr("stroke-dasharray", "10 5 5 5")
       .attr("x1", 0)
       .attr("x2", innerWidth)

@@ -8,7 +8,8 @@ import { margin } from './chartParameters';
 export const handleMouseOver = (event, d) => {
   // Style current mark
   select(event.currentTarget)
-    .attr("stroke-width", "2px")
+    .attr("stroke-width", "1px")
+    .attr("stroke", "var(--primary-color)")
     .attr("opacity", 1)
 
     if (event.currentTarget.className.baseVal !== `legend-mark`) {
@@ -68,16 +69,15 @@ export const handleMouseOver = (event, d) => {
 // Handle mouseOut/leave
 export const handleMouseOut = (event, d) => {
   select(event.currentTarget)
-    .attr("opacity", 0.4)
+    .attr("opacity", 0.5)
+    .attr("stroke", "var(--secondary-color)")
     .attr("stroke-width", "1px");
 
   tooltip
     .attr("data-year", null)
-    // .html(null)
-    .style("z-index", -1)
     .transition()
-    .duration(250)
+    .duration(300)
     .style("opacity", 0)
     .attr("visibility", "hidden")
-
+    .style("z-index", -1)
 }

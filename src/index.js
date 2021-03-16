@@ -7,22 +7,22 @@ import {
   min, 
   max,
  } from 'd3';
+import { xValue, yValue, colorValue } from './accessors';
+import { innerWidth, innerHeight } from './chartParameters';
 import { legend } from './legend';
 import { marks } from './marks';
 import { parseData } from './parseData';
-import { handleMouseOver, handleMouseOut } from './handleMouse';
 // import { tooltip } from './tooltip';
-import { margin, innerWidth, innerHeight, chart, padding } from './chartParameters';
-import { xValue, yValue, colorValue } from './accessors';
 import { buildXAxis } from './xAxis';
 import { buildYAxis } from './yAxis';
 
 // NON-CODE PLANNING: CHART OBJECTIVES
-// race times for the 35 fastest times up Alpe d'Huez in MM:SS (y-axis) 
+// Race times for the 35 fastest times up Alpe d'Huez,
+// measured in minutes and seconds (y-axis) 
 // vs over years; (x-axis)
 // categorical color to distinguish doping allegations: true/false (c-axis)
-// tooltip with details: {Name}: {Nationality} / Year: {Year} Time: {Time} /
-// <br> / {Doping notes} [[optional: URL]]
+// tooltip with details: {Nationality} / {Name} / {Time} in Year /
+// / {Doping notes} or {noting lack of doping notes} 
 
 // Chart basic construction & layout parameters in chartParameters.js
 
@@ -77,15 +77,15 @@ json(dataUrl).then(data => {
   // xAxis -- buildYAxis function in yAxis.js
   buildYAxis(yScale);
 
-  // Tooltip (imported from tooltip.js)
+  // Tooltip -- from tooltip.js)
 
-  // Color Legend (referencing legend.js)
+  // Color Legend -- from legend.js
   legend( 
     colorKeys, 
     colorScale, 
     );
 
-  // Marks (circles)
+  // Marks (circles) -- from marks.js
   marks(
     dataset, 
     xScale, 
@@ -94,6 +94,7 @@ json(dataUrl).then(data => {
     );
   }
 )
+// Gotta catch those errors
 .catch(err => {
   alert(err);
   console.log(err);

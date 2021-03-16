@@ -1,6 +1,6 @@
   import { select } from 'd3';
   
-  // Tooltip
+  // Initialize Tooltip
   export let tooltip = select("#chart-container").append("div")
     .style("opacity", 1)
     .style("z-index", 0)
