@@ -2,7 +2,8 @@ import './index.css';
 // import * as d3 from 'd3';
 import { 
   select, 
-  scaleTime, 
+  scaleTime,
+  scaleOrdinal, 
   json, 
   min, 
   max,
@@ -11,6 +12,8 @@ import {
   selectAll,
   timeFormat
  } from 'd3';
+import { legend } from './legend'
+
 
 // chart objectives
 // race times for the 35 fastest times up Alpe d'Huez 
@@ -20,12 +23,12 @@ import {
 // <br> / {Doping notes} [[optional: URL]]
 
 // Chart parameters
-const padding = 40;
+const padding = 30;
 let margin = {
   top: padding,
-  right: padding + 5,
-  bottom: padding,
-  left: padding + 10
+  right: padding,
+  bottom: padding + 20,
+  left: padding + 35
 };
 let width = 500;
 let height = 375;
@@ -35,16 +38,16 @@ let innerHeight = height - margin.top - margin.bottom;
 // Add primary SVG to div, set viewBox parameters and translate for margins
 let chart = select('#chart-container')
   .append('svg')
-  .attr("id", "chart")
-  .attr("preserveAspectRatio", "xMinYMin meet")
-  .attr("viewBox", `0 0 ${width} ${height}`)
-  .attr("svg-content", true)
-  .style("background", "var(--secondary-color)")
-  .style("color", "var(--primary-color)")
+    .attr("id", "chart")
+    .attr("preserveAspectRatio", "xMinYMin meet")
+    .attr("viewBox", `0 0 ${width} ${height}`)
+    .attr("svg-content", true)
+    .style("background", "var(--secondary-color)")
+    .style("color", "var(--primary-color)")
   //Margin convention
   .append('g')
-  .attr("transform", `translate(${margin.left}, ${margin.top})`)
-  .attr("id", "inner-group")
+    .attr("transform", `translate(${margin.left}, ${margin.top})`)
+    .attr("id", "inner-group")
   ;
 
 // Helper Function: simple clamp (for use in bounding tooltip position )
@@ -71,37 +74,60 @@ json(dataUrl).then(data => {
       // used string literal to force parsing the number year as year
       // alternative would be (d.Year, 0) to indicate YYYY jan 1, 00 etc.
       Year: new Date(`${d.Year}`),
+      // Produce boolean true if doping alegations present in the Doping string
+      dopingBool: (d.Doping) ? true : false
     }
   });
 
-  const xValue = "Year";
-  const yValue = "TimeMins"
-  const colorValue = "Doping"
+  console.log(dataset);
+
+  // accessor functions 
+  const xValue = d => d["Year"];
+  const yValue = d => d["TimeMins"];
+  const colorValue = d => d["dopingBool"];
 
   // Calc xMin xMax yMin yMax (or extent)
-  const xMin = min(dataset, d => d[xValue]);
-  const xMax = max(dataset, d => d[xValue]);
-  const yMin = min(dataset, d => d[yValue]);
-  const yMax = max(dataset, d => d[yValue]);
+  const xMin = min(dataset, xValue);
+  const xMax = max(dataset, xValue);
+  const yMin = min(dataset, yValue);
+  const yMax = max(dataset, yValue);
 
   // xScale 
   const xScale = scaleTime()
     .domain([xMin, xMax])
     .range([0, innerWidth])
-    .nice()
+    // .nice()
     ;
 
   // yScale
   const yScale = scaleTime()
     .domain([yMin, yMax])
     .range([0, innerHeight])
-    .nice();
+    // .nice();
+
+  // colorScale
+  const colorScale = scaleOrdinal()
+    .domain(dataset.map(colorValue))
+    .range([`var(--doping-color)`, `var(--no-doping-color)`])
+
+  const colorKeys = colorScale.domain().map(domainVal => {
+    switch (domainVal) {
+      case true:
+        return `Doping allegations`;
+      case false: 
+        return `No doping allegations`;
+      default:
+        return `No info on doping allegations`;
+    }
+  })
+
+console.log(colorKeys);
 
   // xAxis 
   const xAxis = axisBottom(xScale);
   chart.append("g")
     .attr("id", "x-axis")
-    .attr("transform", `translate(0, ${innerHeight})`)
+    .attr("transform", `translate(0, ${innerHeight +10})`)
     .style("color", "var(--primary-color)")
     .call(xAxis)
     .call(g => g.selectAll("#x-axis .tick text")
@@ -110,14 +136,17 @@ json(dataUrl).then(data => {
       )
     .call(g => g.selectAll("#x-axis .tick line")
       .attr("stroke-opacity", 0.2)
-      // .attr("stroke-dasharray", "4 1 3 1 2 1")
+      .attr("y1", -18)
+      .attr("y2", 10)
+      .attr("transform", `translate(${0}, ${-0})`)
+      .attr("stroke-dasharray", "10 5 5 5")
       )
     .call(g => g.select(".domain")
       .attr("stroke-opacity", 0.0)
       .attr("stroke-dasharray", "10 5 5 5"))
     .append("text")
       .text("Race Year")
-      .attr("transform", `translate(${innerWidth / 2}, ${33})`)
+      .attr("transform", `translate(${innerWidth / 2}, ${35})`)
       .attr("fill", "var(--primary-color)")
       .style("font-size", "1.7em")
       ;
@@ -126,7 +155,7 @@ json(dataUrl).then(data => {
   const yAxis = axisLeft(yScale);
   chart.append("g")
     .attr("id", "y-axis")
-    .attr("transform", `translate(${0}, ${0})`)
+    .attr("transform", `translate(${-20}, ${0})`)
     .style("color", "var(--primary-color)")
     .call(yAxis)
     .call(g => g.selectAll("#y-axis .tick text")
@@ -143,18 +172,13 @@ json(dataUrl).then(data => {
       .attr("stroke-dasharray", "4 1 3 1 2 1"))
     .append("text")
       .text("Alpe d'Huez Race Time")
-      .attr("transform", `translate(${-margin.left + 15}, ${-15})`)
+      .attr("transform", `translate(${-margin.left + padding}, ${0})`)
       .attr("text-anchor", "start")
       .attr("fill", "var(--primary-color)")
-    // .append("text")
-    //   .text("mm:ss")
-    //   // .attr("transform", `translate(${margin.left - 5}, ${-10})`)
-    //   // .attr("text-anchor", "end")
-    //   .attr("fill", "var(--primary-color)")
       ;
 
 
-  // Legend
+
 
   // Tooltip
   let tooltip = select("#chart-container").append("div")
@@ -162,6 +186,7 @@ json(dataUrl).then(data => {
     .style("z-index", 0)
     .style("position", "absolute")
     .attr("id", "tooltip")
+    .attr("visibility", "hidden")
     .html(`<p>There sure is plenty of html in here</p>`);
 
   // Handle mouseOver/focus on marks
@@ -171,8 +196,9 @@ json(dataUrl).then(data => {
       .attr("stroke-width", "2px")
       .attr("opacity", 1)
 
+      if (event.currentTarget.className.baseVal !== `legend-mark`) {
     // Change tooltip message depending on presence of d.Doping value
-    if (d.Doping) {
+    if (d.dopingBool) {
       tooltip
         .html(`
             <p>${d.Nationality}</p>
@@ -197,6 +223,7 @@ json(dataUrl).then(data => {
       .getBoundingClientRect(); 
     
     tooltip
+      .attr("visibility", "visible")
       .style("top",
         `${clamp(
           0,
@@ -209,10 +236,18 @@ json(dataUrl).then(data => {
           event.offsetX + 1,
           chartDimensions.width - tooltipDimensions.width - 2
         )}px`)
+      .attr("data-year", xValue(d))
       .style("z-index", 20)
       .transition()
       .duration(50)
       .style("opacity", 1)
+        }
+      // Only act on tooltip if mark class is not "legend-mark";
+    // previously encased all tooltip activity above, had to be 
+    // depreciated just to affecting opacity due to fcc-test constraints
+    // if (event.currentTarget.className.baseVal !== `legend-mark`) {
+    //   }
+    
   }
 
   // Handle mouseOut/leave
@@ -227,7 +262,19 @@ json(dataUrl).then(data => {
       .transition()
       .duration(250)
       .style("opacity", 0)
+      .attr("visibility", "hidden")
+
   }
+
+  // Color Legend (referencing legend.js)
+  legend(chart, 
+    colorKeys, 
+    colorScale, 
+    innerWidth, 
+    handleMouseOver, 
+    handleMouseOut);
+
+
 
   // Marks (circles)
   chart.selectAll("circle")
@@ -235,15 +282,13 @@ json(dataUrl).then(data => {
     .enter()
     .append("circle")
     .attr("class", "dot")
-    .attr("data-xvalue", d => d[xValue])
-    .attr("data-yvalue", d => d[yValue])
-    .attr("cx", d => xScale(d[xValue]))
-    .attr("cy", d => yScale(d[yValue]))
+    .attr("data-xvalue", xValue)
+    .attr("data-yvalue", yValue)
+    .attr("cx", d => xScale(xValue(d)))
+    .attr("cy", d => yScale(yValue(d)))
     .attr("r", 10)
     .attr("opacity", 0.4)
-    .attr("fill", d => (d[colorValue])
-      ? `var(--doping-color)` 
-      : `var(--no-doping-color)`)
+    .attr("fill", d => colorScale((colorValue(d))))
     .attr("stroke", `hsla(0, 0%, 0%, 1)`)
     .attr("stroke-width", "1px")
     .attr("stroke-linejoin", "round")
