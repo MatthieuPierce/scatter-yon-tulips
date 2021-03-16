@@ -2,6 +2,138 @@
 /******/ 	"use strict";
 /******/ 	var __webpack_modules__ = ({
 
+/***/ "./src/accessors.js":
+/*!**************************!*\
+  !*** ./src/accessors.js ***!
+  \**************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "xValue": () => (/* binding */ xValue),
+/* harmony export */   "yValue": () => (/* binding */ yValue),
+/* harmony export */   "colorValue": () => (/* binding */ colorValue)
+/* harmony export */ });
+// Accessor functions 
+const xValue = d => d["Year"];
+const yValue = d => d["TimeMins"];
+const colorValue = d => d["dopingBool"];
+
+/***/ }),
+
+/***/ "./src/chartParameters.js":
+/*!********************************!*\
+  !*** ./src/chartParameters.js ***!
+  \********************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "padding": () => (/* binding */ padding),
+/* harmony export */   "margin": () => (/* binding */ margin),
+/* harmony export */   "innerWidth": () => (/* binding */ innerWidth),
+/* harmony export */   "innerHeight": () => (/* binding */ innerHeight),
+/* harmony export */   "chart": () => (/* binding */ chart)
+/* harmony export */ });
+/* harmony import */ var d3__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! d3 */ "./node_modules/d3/index.js");
+ // Chart parameters
+
+const padding = 30;
+const margin = {
+  top: padding,
+  right: padding,
+  bottom: padding + 25,
+  left: padding + 35
+};
+let width = 500;
+let height = 375;
+const innerWidth = width - margin.left - margin.right;
+const innerHeight = height - margin.top - margin.bottom; // Add primary SVG to div, set viewBox parameters and translate for margins
+
+let chart = (0,d3__WEBPACK_IMPORTED_MODULE_0__.select)('#chart-container').append('svg').attr("id", "chart").attr("preserveAspectRatio", "xMinYMin meet").attr("viewBox", `0 0 ${width} ${height}`).attr("svg-content", true).style("background", "var(--secondary-color)").style("color", "var(--primary-color)") //Margin convention
+.append('g').attr("transform", `translate(${margin.left}, ${margin.top})`).attr("id", "inner-group");
+
+/***/ }),
+
+/***/ "./src/handleMouse.js":
+/*!****************************!*\
+  !*** ./src/handleMouse.js ***!
+  \****************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "handleMouseOver": () => (/* binding */ handleMouseOver),
+/* harmony export */   "handleMouseOut": () => (/* binding */ handleMouseOut)
+/* harmony export */ });
+/* harmony import */ var d3__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! d3 */ "./node_modules/d3/index.js");
+/* harmony import */ var _accessors__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./accessors */ "./src/accessors.js");
+/* harmony import */ var _helperFunctions__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./helperFunctions */ "./src/helperFunctions.js");
+/* harmony import */ var _tooltip__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./tooltip */ "./src/tooltip.js");
+/* harmony import */ var _chartParameters__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ./chartParameters */ "./src/chartParameters.js");
+
+
+
+
+ // Handle mouseOver/focus on marks
+
+const handleMouseOver = (event, d) => {
+  // Style current mark
+  (0,d3__WEBPACK_IMPORTED_MODULE_0__.select)(event.currentTarget).attr("stroke-width", "1px").attr("stroke", "var(--primary-color)").attr("opacity", 1);
+
+  if (event.currentTarget.className.baseVal !== `legend-mark`) {
+    // Change tooltip message depending on presence of d.Doping value
+    if (d.dopingBool) {
+      _tooltip__WEBPACK_IMPORTED_MODULE_3__.tooltip.html(`
+          <p>${d.Nationality}</p>
+          <p><strong>${d.Name}</strong></p>
+          <p>${d.Time} in ${(0,d3__WEBPACK_IMPORTED_MODULE_0__.timeFormat)("%Y")(d.Year)}</p>
+          <p class="doping">${d.Doping}</p>
+        `);
+    } else {
+      _tooltip__WEBPACK_IMPORTED_MODULE_3__.tooltip.html(`
+          <p>${d.Nationality}</p>
+          <p><strong>${d.Name}</strong></p>
+          <p>${d.Time} in ${(0,d3__WEBPACK_IMPORTED_MODULE_0__.timeFormat)("%Y")(d.Year)}</p>
+          <p class="no-doping">Blessedly, no doping allegations yet</p>
+        `);
+    } // Position and transition tooltip
+
+
+    let tooltipDimensions = document.querySelector("#tooltip").getBoundingClientRect();
+    let chartDimensions = document.querySelector("#chart").getBoundingClientRect();
+    _tooltip__WEBPACK_IMPORTED_MODULE_3__.tooltip.attr("visibility", "visible").style("top", `${(0,_helperFunctions__WEBPACK_IMPORTED_MODULE_2__.clamp)(0, event.offsetY - tooltipDimensions.height, chartDimensions.height - tooltipDimensions.height - 2)}px`).style("left", `${(0,_helperFunctions__WEBPACK_IMPORTED_MODULE_2__.clamp)(_chartParameters__WEBPACK_IMPORTED_MODULE_4__.margin.left, event.offsetX + 1, chartDimensions.width - tooltipDimensions.width - 2)}px`).attr("data-year", (0,_accessors__WEBPACK_IMPORTED_MODULE_1__.xValue)(d)).style("z-index", 20).transition().duration(50).style("opacity", 1);
+  } // Only act on tooltip if mark class is not "legend-mark";
+  // previously encased all tooltip activity above, had to be 
+  // depreciated just to affecting opacity due to fcc-test constraints
+  // if (event.currentTarget.className.baseVal !== `legend-mark`) {
+  //   }
+
+}; // Handle mouseOut/leave
+
+const handleMouseOut = (event, d) => {
+  (0,d3__WEBPACK_IMPORTED_MODULE_0__.select)(event.currentTarget).attr("opacity", 0.5).attr("stroke", "var(--secondary-color)").attr("stroke-width", "1px");
+  _tooltip__WEBPACK_IMPORTED_MODULE_3__.tooltip.attr("data-year", null).transition().duration(300).style("opacity", 0).attr("visibility", "hidden").style("z-index", -1);
+};
+
+/***/ }),
+
+/***/ "./src/helperFunctions.js":
+/*!********************************!*\
+  !*** ./src/helperFunctions.js ***!
+  \********************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "clamp": () => (/* binding */ clamp)
+/* harmony export */ });
+// Helper Functions
+// Helper Function: simple clamp (for use in bounding tooltip position )
+const clamp = (min, val, max) => Math.max(min, Math.min(val, max));
+
+/***/ }),
+
 /***/ "./src/legend.js":
 /*!***********************!*\
   !*** ./src/legend.js ***!
@@ -13,12 +145,129 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   "legend": () => (/* binding */ legend)
 /* harmony export */ });
 /* harmony import */ var d3__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! d3 */ "./node_modules/d3/index.js");
+/* harmony import */ var _handleMouse__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./handleMouse */ "./src/handleMouse.js");
+/* harmony import */ var _chartParameters__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./chartParameters */ "./src/chartParameters.js");
+
+
  // Color legend
 
-const legend = (chart, colorKeys, colorScale, innerWidth, handleMouseOver, handleMouseOut) => {
-  chart.append("g").attr("transform", `translate(${innerWidth - 140}, ${-13})`).attr("id", "legend").append("rect").attr("fill", "var(--secondary-color)").attr("opacity", 1).attr("height", 55).attr("width", 150).attr("id", "legend-box").attr("stroke", "var(--primary-color)").attr("stroke-opacity", 0.1).attr("stroke-dasharray", "10 5 5 5");
-  (0,d3__WEBPACK_IMPORTED_MODULE_0__.select)("#legend").selectAll("legend-mark").data(colorKeys).enter().append("circle").attr("cx", (d, i) => 20).attr("cy", (d, i) => 15 + i * 25).attr("r", 10).attr("fill", d => colorScale(d)).attr("class", "legend-mark").attr("opacity", 0.4).attr("stroke", `hsla(0, 0%, 0%, 1)`).attr("stroke-width", "1px").attr("stroke-linejoin", "round").attr("stroke-dasharray", "4 1 3 1 2 1").on("mouseover focus", handleMouseOver).on("mouseout", handleMouseOut);
-  (0,d3__WEBPACK_IMPORTED_MODULE_0__.select)("#legend").selectAll("legend-label").data(colorKeys).enter().append("text").attr("x", (d, i) => 35).attr("y", (d, i) => 15 + i * 25).text(d => d).attr("text-anchor", "left").style("alignment-baseline", "middle").style("font-size", "0.6em").attr("class", "legend-label");
+const legend = (colorKeys, colorScale) => {
+  _chartParameters__WEBPACK_IMPORTED_MODULE_2__.chart.append("g").attr("transform", `translate(${_chartParameters__WEBPACK_IMPORTED_MODULE_2__.innerWidth - 140}, ${-13})`).attr("id", "legend").append("rect").attr("fill", "var(--secondary-color)").attr("opacity", 1).attr("height", 55).attr("width", 150).attr("id", "legend-box").attr("stroke", "var(--primary-color)").attr("stroke-opacity", 0.3).attr("stroke-dasharray", "10 5 5 5");
+  (0,d3__WEBPACK_IMPORTED_MODULE_0__.select)("#legend").selectAll("legend-mark").data(colorKeys).enter().append("circle").attr("cx", (d, i) => 20).attr("cy", (d, i) => 15 + i * 25).attr("r", 10).attr("fill", d => colorScale(d)).attr("class", "legend-mark").attr("opacity", 0.5).attr("stroke", `var(--secondary-color)`).attr("stroke-width", "1px").attr("stroke-linejoin", "round").attr("stroke-dasharray", "4 1 3 1 2 1").on("mouseover focus", _handleMouse__WEBPACK_IMPORTED_MODULE_1__.handleMouseOver).on("mouseout", _handleMouse__WEBPACK_IMPORTED_MODULE_1__.handleMouseOut);
+  (0,d3__WEBPACK_IMPORTED_MODULE_0__.select)("#legend").selectAll("legend-label").data(colorKeys).enter().append("text").attr("x", (d, i) => 35).attr("y", (d, i) => 15 + i * 25).text(d => d).attr("text-anchor", "left").style("alignment-baseline", "middle").style("font-size", "0.6em").attr("class", "legend-label").attr("fill", "var(--primary-color)");
+};
+
+/***/ }),
+
+/***/ "./src/marks.js":
+/*!**********************!*\
+  !*** ./src/marks.js ***!
+  \**********************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "marks": () => (/* binding */ marks)
+/* harmony export */ });
+/* harmony import */ var _accessors__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./accessors */ "./src/accessors.js");
+/* harmony import */ var _chartParameters__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./chartParameters */ "./src/chartParameters.js");
+/* harmony import */ var _handleMouse__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./handleMouse */ "./src/handleMouse.js");
+
+
+
+let marks = (dataset, xScale, yScale, colorScale) => {
+  _chartParameters__WEBPACK_IMPORTED_MODULE_1__.chart.selectAll("circle").data(dataset).enter().append("circle").attr("class", "dot").attr("data-xvalue", _accessors__WEBPACK_IMPORTED_MODULE_0__.xValue).attr("data-yvalue", _accessors__WEBPACK_IMPORTED_MODULE_0__.yValue).attr("cx", d => xScale((0,_accessors__WEBPACK_IMPORTED_MODULE_0__.xValue)(d))).attr("cy", d => yScale((0,_accessors__WEBPACK_IMPORTED_MODULE_0__.yValue)(d))).attr("r", 10).attr("opacity", 0.5).attr("fill", d => colorScale((0,_accessors__WEBPACK_IMPORTED_MODULE_0__.colorValue)(d))).attr("stroke", `var(--secondary-color)`).attr("stroke-width", "1px").attr("stroke-linejoin", "round").attr("stroke-dasharray", "4 1 3 1 2 1").on("mouseover pointerover focus", _handleMouse__WEBPACK_IMPORTED_MODULE_2__.handleMouseOver).on("mouseout pounterout pointerleave", _handleMouse__WEBPACK_IMPORTED_MODULE_2__.handleMouseOut);
+};
+
+/***/ }),
+
+/***/ "./src/parseData.js":
+/*!**************************!*\
+  !*** ./src/parseData.js ***!
+  \**************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "parseData": () => (/* binding */ parseData)
+/* harmony export */ });
+// Parse data from source into chart-useable components
+// Standard application: Array of objects
+const parseData = data => {
+  // Console dataset to examine (comment out afterwards)
+  // console.log(data);
+  // Doping: string, Name: string, Nationality: string (iso 3166-1 alpha-3),
+  // Place: number, Seconds: number, Time: string (converted string of Seconds)
+  // URL: string (src for Doping), Year: number
+  return data.map(d => {
+    return { ...d,
+      TimeMins: new Date(d.Seconds * 1000),
+      // used string literal to force parsing the number year as year
+      // alternative would be (d.Year, 0) to indicate YYYY jan 1, 00 etc.
+      Year: new Date(`${d.Year}`),
+      // Produce boolean true if doping alegations present in the Doping string
+      dopingBool: d.Doping ? true : false
+    };
+  });
+};
+
+/***/ }),
+
+/***/ "./src/tooltip.js":
+/*!************************!*\
+  !*** ./src/tooltip.js ***!
+  \************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "tooltip": () => (/* binding */ tooltip)
+/* harmony export */ });
+/* harmony import */ var d3__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! d3 */ "./node_modules/d3/index.js");
+ // Initialize Tooltip
+
+let tooltip = (0,d3__WEBPACK_IMPORTED_MODULE_0__.select)("#chart-container").append("div").style("opacity", 1).style("z-index", 0).style("position", "absolute").attr("id", "tooltip").attr("visibility", "hidden").html(`<p>There sure is plenty of html in here</p>`);
+
+/***/ }),
+
+/***/ "./src/xAxis.js":
+/*!**********************!*\
+  !*** ./src/xAxis.js ***!
+  \**********************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "buildXAxis": () => (/* binding */ buildXAxis)
+/* harmony export */ });
+/* harmony import */ var d3__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! d3 */ "./node_modules/d3/index.js");
+/* harmony import */ var _chartParameters__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./chartParameters */ "./src/chartParameters.js");
+
+
+const buildXAxis = xScale => {
+  const xAxis = (0,d3__WEBPACK_IMPORTED_MODULE_0__.axisBottom)(xScale);
+  _chartParameters__WEBPACK_IMPORTED_MODULE_1__.chart.append("g").attr("id", "x-axis").attr("transform", `translate(0, ${_chartParameters__WEBPACK_IMPORTED_MODULE_1__.innerHeight + 10})`).style("color", "var(--primary-color)").call(xAxis).call(g => g.selectAll("#x-axis .tick text").text(t => (0,d3__WEBPACK_IMPORTED_MODULE_0__.timeFormat)("%Y")(t))).call(g => g.selectAll("#x-axis .tick line").attr("stroke-opacity", 0.3).attr("y1", -18).attr("y2", 10).attr("transform", `translate(${0}, ${-0})`).attr("stroke-dasharray", "10 5 5 5")).call(g => g.select(".domain").attr("stroke-opacity", 0.0).attr("stroke-dasharray", "10 5 5 5")).append("text").text("Race Year").attr("transform", `translate(${_chartParameters__WEBPACK_IMPORTED_MODULE_1__.innerWidth / 2}, ${35})`).attr("fill", "var(--primary-color)").style("font-size", "1.7em");
+};
+
+/***/ }),
+
+/***/ "./src/yAxis.js":
+/*!**********************!*\
+  !*** ./src/yAxis.js ***!
+  \**********************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "buildYAxis": () => (/* binding */ buildYAxis)
+/* harmony export */ });
+/* harmony import */ var d3__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! d3 */ "./node_modules/d3/index.js");
+/* harmony import */ var _chartParameters__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./chartParameters */ "./src/chartParameters.js");
+
+
+const buildYAxis = yScale => {
+  const yAxis = (0,d3__WEBPACK_IMPORTED_MODULE_0__.axisLeft)(yScale);
+  _chartParameters__WEBPACK_IMPORTED_MODULE_1__.chart.append("g").attr("id", "y-axis").attr("transform", `translate(${-20}, ${0})`).style("color", "var(--primary-color)").call(yAxis).call(g => g.selectAll("#y-axis .tick text").text(t => (0,d3__WEBPACK_IMPORTED_MODULE_0__.timeFormat)("%M:%S")(t))).call(g => g.selectAll("#y-axis .tick line").attr("stroke-opacity", 0.3).attr("stroke-dasharray", "10 5 5 5").attr("x1", 0).attr("x2", _chartParameters__WEBPACK_IMPORTED_MODULE_1__.innerWidth)).call(g => g.select(".domain").attr("stroke-opacity", 0.0).attr("stroke-dasharray", "4 1 3 1 2 1")).append("text").text("Alpe d'Huez Race Time").attr("transform", `translate(${-_chartParameters__WEBPACK_IMPORTED_MODULE_1__.margin.left + _chartParameters__WEBPACK_IMPORTED_MODULE_1__.padding}, ${0})`).attr("text-anchor", "start").attr("fill", "var(--primary-color)").style("font-size", "1.7em");
 };
 
 /***/ }),
@@ -30672,77 +30921,52 @@ var __webpack_exports__ = {};
 __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _index_css__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./index.css */ "./src/index.css");
 /* harmony import */ var d3__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! d3 */ "./node_modules/d3/index.js");
-/* harmony import */ var _legend__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./legend */ "./src/legend.js");
- // import * as d3 from 'd3';
+/* harmony import */ var _accessors__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./accessors */ "./src/accessors.js");
+/* harmony import */ var _chartParameters__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./chartParameters */ "./src/chartParameters.js");
+/* harmony import */ var _legend__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ./legend */ "./src/legend.js");
+/* harmony import */ var _marks__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ./marks */ "./src/marks.js");
+/* harmony import */ var _parseData__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! ./parseData */ "./src/parseData.js");
+/* harmony import */ var _xAxis__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! ./xAxis */ "./src/xAxis.js");
+/* harmony import */ var _yAxis__WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__(/*! ./yAxis */ "./src/yAxis.js");
 
 
- // chart objectives
-// race times for the 35 fastest times up Alpe d'Huez 
-// over  years;
-// categorical color to distinguish doping allegations: true/false
-// tooltip with details: {Name}: {Nationality} / Year: {Year} Time: {Time} /
-// <br> / {Doping notes} [[optional: URL]]
-// Chart parameters
 
-const padding = 30;
-let margin = {
-  top: padding,
-  right: padding,
-  bottom: padding + 25,
-  left: padding + 35
-};
-let width = 500;
-let height = 375;
-let innerWidth = width - margin.left - margin.right;
-let innerHeight = height - margin.top - margin.bottom; // Add primary SVG to div, set viewBox parameters and translate for margins
 
-let chart = (0,d3__WEBPACK_IMPORTED_MODULE_1__.select)('#chart-container').append('svg').attr("id", "chart").attr("preserveAspectRatio", "xMinYMin meet").attr("viewBox", `0 0 ${width} ${height}`).attr("svg-content", true).style("background", "var(--secondary-color)").style("color", "var(--primary-color)") //Margin convention
-.append('g').attr("transform", `translate(${margin.left}, ${margin.top})`).attr("id", "inner-group"); // Helper Function: simple clamp (for use in bounding tooltip position )
 
-let clamp = (min, val, max) => Math.max(min, Math.min(val, max));
+
+ // import { tooltip } from './tooltip';
+
+
+ // NON-CODE PLANNING: CHART OBJECTIVES
+// Race times for the 35 fastest times up Alpe d'Huez,
+// measured in minutes and seconds (y-axis) 
+// vs over years; (x-axis)
+// categorical color to distinguish doping allegations: true/false (c-axis)
+// tooltip with details: {Nationality} / {Name} / {Time} in Year /
+// / {Doping notes} or {noting lack of doping notes} 
+// Chart basic construction & layout parameters in chartParameters.js
 
 let dataset; // Datset source
 
 const dataUrl = 'https://raw.githubusercontent.com/freeCodeCamp/ProjectReferenceData/master/cyclist-data.json'; // Fetch Dataset & Render Marks
 
 (0,d3__WEBPACK_IMPORTED_MODULE_1__.json)(dataUrl).then(data => {
-  // console dataset to examine
-  console.log(data); // Doping: string, Name: string, Nationality: string (iso 3166-1 alpha-3),
-  // Place: number, Seconds: number, Time: string (converted string of Seconds),
-  // URL: string (src for Doping), Year: number
-  // Parse dataset
+  // Parse dataset function in parseData.js
+  dataset = (0,_parseData__WEBPACK_IMPORTED_MODULE_6__.parseData)(data); // Console out parsed dataset for examination
+  // console.log(dataset);
+  // Calc xMin xMax yMin yMax (or extent)
 
-  const dataset = data.map(d => {
-    return { ...d,
-      TimeMins: new Date(d.Seconds * 1000),
-      // used string literal to force parsing the number year as year
-      // alternative would be (d.Year, 0) to indicate YYYY jan 1, 00 etc.
-      Year: new Date(`${d.Year}`),
-      // Produce boolean true if doping alegations present in the Doping string
-      dopingBool: d.Doping ? true : false
-    };
-  });
-  console.log(dataset); // accessor functions 
+  const xMin = (0,d3__WEBPACK_IMPORTED_MODULE_1__.min)(dataset, _accessors__WEBPACK_IMPORTED_MODULE_2__.xValue);
+  const xMax = (0,d3__WEBPACK_IMPORTED_MODULE_1__.max)(dataset, _accessors__WEBPACK_IMPORTED_MODULE_2__.xValue);
+  const yMin = (0,d3__WEBPACK_IMPORTED_MODULE_1__.min)(dataset, _accessors__WEBPACK_IMPORTED_MODULE_2__.yValue);
+  const yMax = (0,d3__WEBPACK_IMPORTED_MODULE_1__.max)(dataset, _accessors__WEBPACK_IMPORTED_MODULE_2__.yValue); // xScale
 
-  const xValue = d => d["Year"];
+  const xScale = (0,d3__WEBPACK_IMPORTED_MODULE_1__.scaleTime)().domain([xMin, xMax]).range([0, _chartParameters__WEBPACK_IMPORTED_MODULE_3__.innerWidth]); // yScale
 
-  const yValue = d => d["TimeMins"];
-
-  const colorValue = d => d["dopingBool"]; // Calc xMin xMax yMin yMax (or extent)
-
-
-  const xMin = (0,d3__WEBPACK_IMPORTED_MODULE_1__.min)(dataset, xValue);
-  const xMax = (0,d3__WEBPACK_IMPORTED_MODULE_1__.max)(dataset, xValue);
-  const yMin = (0,d3__WEBPACK_IMPORTED_MODULE_1__.min)(dataset, yValue);
-  const yMax = (0,d3__WEBPACK_IMPORTED_MODULE_1__.max)(dataset, yValue); // xScale 
-
-  const xScale = (0,d3__WEBPACK_IMPORTED_MODULE_1__.scaleTime)().domain([xMin, xMax]).range([0, innerWidth]) // .nice()
-  ; // yScale
-
-  const yScale = (0,d3__WEBPACK_IMPORTED_MODULE_1__.scaleTime)().domain([yMin, yMax]).range([0, innerHeight]); // .nice();
+  const yScale = (0,d3__WEBPACK_IMPORTED_MODULE_1__.scaleTime)().domain([yMin, yMax]).range([0, _chartParameters__WEBPACK_IMPORTED_MODULE_3__.innerHeight]); // .nice();
   // colorScale
 
-  const colorScale = (0,d3__WEBPACK_IMPORTED_MODULE_1__.scaleOrdinal)().domain(dataset.map(colorValue)).range([`var(--doping-color)`, `var(--no-doping-color)`]);
+  const colorScale = (0,d3__WEBPACK_IMPORTED_MODULE_1__.scaleOrdinal)().domain(dataset.map(_accessors__WEBPACK_IMPORTED_MODULE_2__.colorValue)).range([`var(--doping-color)`, `var(--no-doping-color)`]);
   const colorKeys = colorScale.domain().map(domainVal => {
     switch (domainVal) {
       case true:
@@ -30754,64 +30978,18 @@ const dataUrl = 'https://raw.githubusercontent.com/freeCodeCamp/ProjectReference
       default:
         return `No info on doping allegations`;
     }
-  });
-  console.log(colorKeys); // xAxis 
+  }); // xAxis -- buildXAxis function in xAxis.js
 
-  const xAxis = (0,d3__WEBPACK_IMPORTED_MODULE_1__.axisBottom)(xScale);
-  chart.append("g").attr("id", "x-axis").attr("transform", `translate(0, ${innerHeight + 10})`).style("color", "var(--primary-color)").call(xAxis).call(g => g.selectAll("#x-axis .tick text").text(t => (0,d3__WEBPACK_IMPORTED_MODULE_1__.timeFormat)("%Y")(t)) // .attr("fill", "red")
-  ).call(g => g.selectAll("#x-axis .tick line").attr("stroke-opacity", 0.2).attr("y1", -18).attr("y2", 10).attr("transform", `translate(${0}, ${-0})`).attr("stroke-dasharray", "10 5 5 5")).call(g => g.select(".domain").attr("stroke-opacity", 0.0).attr("stroke-dasharray", "10 5 5 5")).append("text").text("Race Year").attr("transform", `translate(${innerWidth / 2}, ${35})`).attr("fill", "var(--primary-color)").style("font-size", "1.7em"); // yAxis
+  (0,_xAxis__WEBPACK_IMPORTED_MODULE_7__.buildXAxis)(xScale); // xAxis -- buildYAxis function in yAxis.js
 
-  const yAxis = (0,d3__WEBPACK_IMPORTED_MODULE_1__.axisLeft)(yScale);
-  chart.append("g").attr("id", "y-axis").attr("transform", `translate(${-20}, ${0})`).style("color", "var(--primary-color)").call(yAxis).call(g => g.selectAll("#y-axis .tick text").text(t => (0,d3__WEBPACK_IMPORTED_MODULE_1__.timeFormat)("%M:%S")(t))).call(g => g.selectAll("#y-axis .tick line").attr("stroke-opacity", 0.1).attr("stroke-dasharray", "10 5 5 5").attr("x1", 0).attr("x2", innerWidth)).call(g => g.select(".domain").attr("stroke-opacity", 0.0).attr("stroke-dasharray", "4 1 3 1 2 1")).append("text").text("Alpe d'Huez Race Time").attr("transform", `translate(${-margin.left + padding}, ${0})`).attr("text-anchor", "start").attr("fill", "var(--primary-color)").style("font-size", "1.7em"); // Tooltip
+  (0,_yAxis__WEBPACK_IMPORTED_MODULE_8__.buildYAxis)(yScale); // Tooltip -- from tooltip.js)
+  // Color Legend -- from legend.js
 
-  let tooltip = (0,d3__WEBPACK_IMPORTED_MODULE_1__.select)("#chart-container").append("div").style("opacity", 1).style("z-index", 0).style("position", "absolute").attr("id", "tooltip").attr("visibility", "hidden").html(`<p>There sure is plenty of html in here</p>`); // Handle mouseOver/focus on marks
+  (0,_legend__WEBPACK_IMPORTED_MODULE_4__.legend)(colorKeys, colorScale); // Marks (circles) -- from marks.js
 
-  const handleMouseOver = (event, d) => {
-    // Style current mark
-    (0,d3__WEBPACK_IMPORTED_MODULE_1__.select)(event.currentTarget).attr("stroke-width", "2px").attr("opacity", 1);
-
-    if (event.currentTarget.className.baseVal !== `legend-mark`) {
-      // Change tooltip message depending on presence of d.Doping value
-      if (d.dopingBool) {
-        tooltip.html(`
-            <p>${d.Nationality}</p>
-            <p><strong>${d.Name}</strong></p>
-            <p>${d.Time} in ${(0,d3__WEBPACK_IMPORTED_MODULE_1__.timeFormat)("%Y")(d.Year)}</p>
-            <p class="doping">${d.Doping}</p>
-          `);
-      } else {
-        tooltip.html(`
-            <p>${d.Nationality}</p>
-            <p><strong>${d.Name}</strong></p>
-            <p>${d.Time} in ${(0,d3__WEBPACK_IMPORTED_MODULE_1__.timeFormat)("%Y")(d.Year)}</p>
-            <p class="no-doping">Blessedly, no doping allegations yet</p>
-          `);
-      } // Position and transition tooltip
-
-
-      let tooltipDimensions = document.querySelector("#tooltip").getBoundingClientRect();
-      let chartDimensions = document.querySelector("#chart").getBoundingClientRect();
-      tooltip.attr("visibility", "visible").style("top", `${clamp(0, event.offsetY - tooltipDimensions.height, chartDimensions.height - tooltipDimensions.height - 2)}px`).style("left", `${clamp(margin.left, event.offsetX + 1, chartDimensions.width - tooltipDimensions.width - 2)}px`).attr("data-year", xValue(d)).style("z-index", 20).transition().duration(50).style("opacity", 1);
-    } // Only act on tooltip if mark class is not "legend-mark";
-    // previously encased all tooltip activity above, had to be 
-    // depreciated just to affecting opacity due to fcc-test constraints
-    // if (event.currentTarget.className.baseVal !== `legend-mark`) {
-    //   }
-
-  }; // Handle mouseOut/leave
-
-
-  const handleMouseOut = (event, d) => {
-    (0,d3__WEBPACK_IMPORTED_MODULE_1__.select)(event.currentTarget).attr("opacity", 0.4).attr("stroke-width", "1px");
-    tooltip.attr("data-year", null) // .html(null)
-    .style("z-index", -1).transition().duration(250).style("opacity", 0).attr("visibility", "hidden");
-  }; // Color Legend (referencing legend.js)
-
-
-  (0,_legend__WEBPACK_IMPORTED_MODULE_2__.legend)(chart, colorKeys, colorScale, innerWidth, handleMouseOver, handleMouseOut); // Marks (circles)
-
-  chart.selectAll("circle").data(dataset).enter().append("circle").attr("class", "dot").attr("data-xvalue", xValue).attr("data-yvalue", yValue).attr("cx", d => xScale(xValue(d))).attr("cy", d => yScale(yValue(d))).attr("r", 10).attr("opacity", 0.4).attr("fill", d => colorScale(colorValue(d))).attr("stroke", `hsla(0, 0%, 0%, 1)`).attr("stroke-width", "1px").attr("stroke-linejoin", "round").attr("stroke-dasharray", "4 1 3 1 2 1").on("mouseover pointerover focus", handleMouseOver).on("mouseout pounterout pointerleave", handleMouseOut);
-}).catch(err => {
+  (0,_marks__WEBPACK_IMPORTED_MODULE_5__.marks)(dataset, xScale, yScale, colorScale);
+}) // Gotta catch those errors
+.catch(err => {
   alert(err);
   console.log(err);
 });

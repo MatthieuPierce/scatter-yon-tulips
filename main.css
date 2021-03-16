@@ -1,13 +1,20 @@
 @import url(https://fonts.googleapis.com/css2?family=Inter&display=swap);
 :root {
-  --primary-color: hsl(49, 57%, 7%);
+  /* --primary-color: hsl(49, 57%, 7%);
   --secondary-color: hsl(49, 57%, 92%);
   --doping-color: hsla(20, 70%, 50%, 1);
-  --no-doping-color: hsla(150, 70%, 50%, 1);
+  --no-doping-color: hsla(150, 70%, 50%, 1); */
+  --primary-color:	#e7e8e9;
+  --secondary-color: #101820;
+  --doping-color: #d14124;
+  --no-doping-color: #20aa3f;
+  --mark-stroke-color: var(--secondary-color);
+  --line-stroke-color: var(--primary-color);
+  --bg-color: hsla(210, 33%, 70%);
 }
 
 body {
-  background: var(--primary-color);
+  background: var(--bg-color);
   color: var(--secondary-color);
   font-family: "Inter", sans-serif;
   margin: 0;
@@ -33,13 +40,15 @@ main {
 
 #chart-container {
   /* display: inline-block; */
-  position: relative;
-  width: 100%;
+  /* filter: drop-shadow(0rem 5rem 10rem var(--primary-color)); */
+  /* box-shadow: 0rem 0rem 20rem 5rem var(--primary-color); */
+  overflow: hidden;
   padding: 0;
   /* padding-bottom calc trick for resizing svg: 100% * height / width ratio */
   padding-bottom: calc(100% * 3 / 4);
+  position: relative;
   vertical-align: top;
-  overflow: hidden;
+  width: 100%;
   z-index: 2;
 }
 
@@ -52,10 +61,11 @@ main {
 }
 
 #tooltip {
+  color: var(--primary-color);
   display: grid;
   place-items: center;
   place-content: center;
-  background-color: rgba(31, 44, 71, 0.9);
+  background-color: var(--secondary-color);
   border-radius: 100%;
   box-sizing: border-box;
   padding: 10px 0;
@@ -63,6 +73,9 @@ main {
   font-size: 0.8rem;
   height: 150px;
   width: 150px;
+  border-color: var(-primary-color);
+  border-style: dashed;
+  border-width: 2px;
 }
 
 #tooltip p {
